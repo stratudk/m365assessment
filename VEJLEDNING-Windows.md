@@ -45,14 +45,6 @@ Scriptet ligger på GitHub her:
    højre over filen.
 4. Filen gemmes i din mappe **Overførsler** (Downloads).
 
-> **Valgfrit – verificér filen:** Du kan kontrollere, at du har fået den rigtige,
-> uændrede fil. Åbn PowerShell 7 (se trin 3) og kør:
-> ```
-> Get-FileHash $HOME\Downloads\Run-Maester.ps1 -Algorithm SHA256
-> ```
-> Resultatet skal matche denne værdi:
-> `CD3BC36975399301C2DF733ED82B8E7B92968E59FC87D1013D71CC757E32F6AE`
-
 ---
 
 ## 3. Start PowerShell 7
@@ -64,16 +56,22 @@ Du har nu en kommandolinje klar.
 
 ## 4. Kør tjekket
 
-Skriv `pwsh -File ` (med mellemrum til sidst), **træk derefter filen `Run-Maester.ps1`
-ind i vinduet** med musen (så indsættes stien automatisk), og tryk Enter.
+Skriv `pwsh -ExecutionPolicy Bypass -File ` (med mellemrum til sidst), **træk derefter
+filen `Run-Maester.ps1` ind i vinduet** med musen (så indsættes stien automatisk), og
+tryk Enter.
 
 Kommandoen kommer til at se nogenlunde sådan ud:
 ```
-pwsh -File C:\Users\ditnavn\Downloads\Run-Maester.ps1
+pwsh -ExecutionPolicy Bypass -File C:\Users\ditnavn\Downloads\Run-Maester.ps1
 ```
 
-Tjekket går nu i gang. Først installeres de nødvendige værktøjer (det tager et par
-minutter første gang).
+> **Hvorfor `-ExecutionPolicy Bypass`?** Windows blokerer som standard scripts, der er
+> hentet fra internettet. Tilføjelsen tillader netop **denne ene kørsel** og ændrer
+> **ikke** nogen varig indstilling på maskinen.
+
+Tjekket går nu i gang. **Vær tålmodig:** Først installeres de nødvendige værktøjer, og
+der kan gå **et par minutter, før login-vinduet dukker op**. Det er normalt – luk ikke
+vinduet imens.
 
 ---
 
@@ -81,16 +79,27 @@ minutter første gang).
 
 Når du bliver bedt om det:
 
-1. Der åbnes et **browservindue**. Log ind med din arbejdskonto – har du en
+1. Der åbnes et **login-vindue**. Log ind med din arbejdskonto – har du en
    **separat administrator-konto**, så brug den.
-2. Godkend den **læsende** adgang, der bliver spurgt om.
+2. Godkend den **læsende** adgang (permissions), der bliver spurgt om.
 3. Du bliver sandsynligvis bedt om at logge ind **flere gange** i træk
-   (Entra/Graph, Exchange Online, Teams, Purview og Azure). Det er forventet –
-   godkend hver enkelt.
+   (Entra/Graph, Exchange Online, Teams, Purview og Azure). For hver tjeneste kan du
+   se en tilladelses-pop-up og derefter pop-up'en nævnt nedenfor – det er forventet,
+   gentag samme valg hver gang.
 
-> Hvis der ikke kan åbnes et browservindue (fx på en server), så kør i stedet:
-> `pwsh -File <sti til filen> -UseDeviceCode` – så får du i stedet en kort kode,
-> som du indtaster på https://microsoft.com/devicelogin i en anden fane.
+**Vær opmærksom på disse to pop-ups:**
+
+- **"Sign in to all your apps" / "Forbliv logget ind på alle dine apps":** Vælg linket
+  **"Nej, kun denne app"** ("No, sign in to this app only") nederst – **ikke** "OK"/"Ja".
+  Det undgår, at din enhed bliver tilmeldt organisationen.
+- **Forsvinder login-vinduet?** Hvis du vælger **"Anden bruger" / "Other user"**, kan
+  vinduet lægge sig **bag de øvrige vinduer** og mangle i proceslinjen. Tryk
+  **Alt+Tab** for at hente det frem igen.
+
+> Hvis der slet ikke kan åbnes et login-vindue (fx på en server), så kør i stedet:
+> `pwsh -ExecutionPolicy Bypass -File <sti til filen> -UseDeviceCode` – så får du i
+> stedet en kort kode, som du indtaster på https://microsoft.com/devicelogin i en
+> anden fane.
 
 ---
 
