@@ -47,14 +47,6 @@ Scriptet ligger på GitHub her:
    højre over filen.
 4. Filen gemmes i din mappe **Overførsler** (Downloads).
 
-> **Valgfrit – verificér filen:** Du kan kontrollere, at du har fået den rigtige,
-> uændrede fil. Åbn Terminal og kør:
-> ```
-> shasum -a 256 ~/Downloads/Run-Maester.ps1
-> ```
-> Resultatet skal matche denne værdi:
-> `cd3bc36975399301c2df733ed82b8e7b92968e59fc87d1013d71cc757e32f6ae`
-
 ---
 
 ## 3. Start PowerShell 7
@@ -74,8 +66,9 @@ Kommandoen kommer til at se nogenlunde sådan ud:
 pwsh -File ~/Downloads/Run-Maester.ps1
 ```
 
-Tjekket går nu i gang. Først installeres de nødvendige værktøjer (det tager et par
-minutter første gang).
+Tjekket går nu i gang. **Vær tålmodig:** Først installeres de nødvendige værktøjer, og
+der kan gå **et par minutter, før login-vinduet dukker op**. Det er normalt – luk ikke
+vinduet imens.
 
 ---
 
