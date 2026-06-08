@@ -3,7 +3,7 @@
 <#
 .SYNOPSIS
     Runs Maester against your Microsoft 365 tenant with FULL coverage and saves
-    the results to a single JSON file you can send back to your StratuOne
+    the results to a single JSON file you can send back to your Statu
     consultant.
 
     Run this on your own machine in PowerShell 7 — a browser window opens for
@@ -90,7 +90,7 @@ function Get-WindowsPowerShell51Path {
 }
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host " StratuOne - Maester security check (full coverage)" -ForegroundColor Cyan
+Write-Host " Statu - M365 Reality Check (full coverage)" -ForegroundColor Cyan
 Write-Host " Read-only. No app registration. Nothing is changed." -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
@@ -245,7 +245,7 @@ if ($scubaRan) {
 }
 Write-Host "============================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "To send the results to your StratuOne consultant:" -ForegroundColor Cyan
+Write-Host "To send the results to your Statu consultant:" -ForegroundColor Cyan
 Write-Host "  1. Find the Maester file at:" -ForegroundColor White
 Write-Host "       $OutputFile" -ForegroundColor White
 if ($scubaRan) {

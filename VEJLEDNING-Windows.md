@@ -1,4 +1,4 @@
-# StratuOne sikkerhedstjek – vejledning til **Windows**
+# M365 Reality Check – vejledning til **Windows**
 
 Denne vejledning hjælper dig med at køre vores sikkerhedstjek på jeres Microsoft 365-miljø
 og sende resultatet tilbage til os.
@@ -36,8 +36,22 @@ testene sprunget over – det er helt normalt.
 
 ## 2. Hent scriptet
 
-Gem filen **`Run-Maester.ps1`**, som du har fået fra os, et sted du kan finde igen –
-fx i mappen **Overførsler** (Downloads).
+Scriptet ligger på GitHub her:
+**https://github.com/stratudk/m365assessment**
+
+1. Åbn linket i en browser.
+2. Klik på filen **`Run-Maester.ps1`** i fillisten.
+3. Klik på download-knappen (**"Download raw file"** – ned-pil-ikonet) oppe til
+   højre over filen.
+4. Filen gemmes i din mappe **Overførsler** (Downloads).
+
+> **Valgfrit – verificér filen:** Du kan kontrollere, at du har fået den rigtige,
+> uændrede fil. Åbn PowerShell 7 (se trin 3) og kør:
+> ```
+> Get-FileHash $HOME\Downloads\Run-Maester.ps1 -Algorithm SHA256
+> ```
+> Resultatet skal matche denne værdi:
+> `CD3BC36975399301C2DF733ED82B8E7B92968E59FC87D1013D71CC757E32F6AE`
 
 ---
 
@@ -103,7 +117,7 @@ Til sidst i vinduet står der præcis, hvor filerne ligger. Som standard:
 
 **Sådan sender du dem:**
 1. Find filen **`maester-results.json`** og vedhæft den i en mail til din
-   StratuOne-konsulent.
+   Statu-konsulent.
 2. Hvis der også er en mappe ved navn **`scuba-results`**: højreklik på mappen →
    **"Send til"** → **"Komprimeret mappe (zip)"**, og vedhæft zip-filen i samme mail.
 
