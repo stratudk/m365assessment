@@ -3,7 +3,7 @@
 <#
 .SYNOPSIS
     Runs Maester against your Microsoft 365 tenant with FULL coverage and saves
-    the results to a single JSON file you can send back to your StratuOne
+    the results to a single JSON file you can send back to your Statu
     consultant.
 
     Run this on your own machine in PowerShell 7 — a browser window opens for
@@ -90,7 +90,7 @@ function Get-WindowsPowerShell51Path {
 }
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host " StratuOne - Maester security check (full coverage)" -ForegroundColor Cyan
+Write-Host " Statu - M365 Reality Check (full coverage)" -ForegroundColor Cyan
 Write-Host " Read-only. No app registration. Nothing is changed." -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
@@ -211,7 +211,13 @@ if ($SkipScuba) {
     # ScubaGear can't run under PowerShell 7, so hand the work to powershell.exe.
     # Initialize-SCuBA installs OPA and the per-product dependency modules; '*'
     # runs every product baseline, including Power Platform (not in the default set).
-    $scubaScript = @'
+    #
+    # Build the child script with .Replace, NOT the -f format operator: the here-
+    # string contains literal { } braces (the if-block), which -f would misread as
+    # format placeholders and fail with "Input string was not in a correct format".
+    # The whole thing is inside try/catch so any hiccup here stays non-blocking.
+    try {
+        $scubaScript = @'
 $ErrorActionPreference = "Stop"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 if (-not (Get-Module -ListAvailable -Name ScubaGear)) {
@@ -219,10 +225,9 @@ if (-not (Get-Module -ListAvailable -Name ScubaGear)) {
 }
 Import-Module ScubaGear
 Initialize-SCuBA
-Invoke-SCuBA -ProductNames '*' -OutPath "{0}" -Quiet
-'@ -f $ScubaOutPath
+Invoke-SCuBA -ProductNames '*' -OutPath "__SCUBA_OUTPATH__" -Quiet
+'@.Replace('__SCUBA_OUTPATH__', $ScubaOutPath)
 
-    try {
         & $ps51 -NoProfile -ExecutionPolicy Bypass -Command $scubaScript
         if ($LASTEXITCODE -ne 0) { throw "ScubaGear exited with code $LASTEXITCODE." }
         $scubaRan = $true
@@ -245,7 +250,7 @@ if ($scubaRan) {
 }
 Write-Host "============================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "To send the results to your StratuOne consultant:" -ForegroundColor Cyan
+Write-Host "To send the results to your Statu consultant:" -ForegroundColor Cyan
 Write-Host "  1. Find the Maester file at:" -ForegroundColor White
 Write-Host "       $OutputFile" -ForegroundColor White
 if ($scubaRan) {

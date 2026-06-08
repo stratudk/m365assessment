@@ -1,4 +1,4 @@
-# StratuOne sikkerhedstjek – vejledning til **Mac**
+# M365 Reality Check – vejledning til **Mac**
 
 Denne vejledning hjælper dig med at køre vores sikkerhedstjek på jeres Microsoft 365-miljø
 og sende resultatet tilbage til os.
@@ -38,8 +38,14 @@ testene sprunget over – det er helt normalt.
 
 ## 2. Hent scriptet
 
-Gem filen **`Run-Maester.ps1`**, som du har fået fra os, et sted du kan finde igen –
-fx i mappen **Overførsler** (Downloads).
+Scriptet ligger på GitHub her:
+**https://github.com/stratudk/m365assessment**
+
+1. Åbn linket i en browser.
+2. Klik på filen **`Run-Maester.ps1`** i fillisten.
+3. Klik på download-knappen (**"Download raw file"** – ned-pil-ikonet) oppe til
+   højre over filen.
+4. Filen gemmes i din mappe **Overførsler** (Downloads).
 
 ---
 
@@ -60,8 +66,9 @@ Kommandoen kommer til at se nogenlunde sådan ud:
 pwsh -File ~/Downloads/Run-Maester.ps1
 ```
 
-Tjekket går nu i gang. Først installeres de nødvendige værktøjer (det tager et par
-minutter første gang).
+Tjekket går nu i gang. **Vær tålmodig:** Først installeres de nødvendige værktøjer, og
+der kan gå **et par minutter, før login-vinduet dukker op**. Det er normalt – luk ikke
+vinduet imens.
 
 ---
 
@@ -102,7 +109,7 @@ Til sidst i vinduet står der præcis, hvor filen ligger. Som standard:
 **Sådan sender du den:**
 1. Find filen **`maester-results.json`** på det viste sted. (Tip: i **Finder** kan du
    trykke ⌘+⇧+H for at åbne din hjemmemappe, hvor filen ligger.)
-2. Vedhæft den i en mail til din StratuOne-konsulent.
+2. Vedhæft den i en mail til din Statu-konsulent.
 
 Det var det – tak! Vi tager os af resten.
 

@@ -1,4 +1,4 @@
-# StratuOne sikkerhedstjek – vejledning til **Windows**
+# M365 Reality Check – vejledning til **Windows**
 
 Denne vejledning hjælper dig med at køre vores sikkerhedstjek på jeres Microsoft 365-miljø
 og sende resultatet tilbage til os.
@@ -36,8 +36,14 @@ testene sprunget over – det er helt normalt.
 
 ## 2. Hent scriptet
 
-Gem filen **`Run-Maester.ps1`**, som du har fået fra os, et sted du kan finde igen –
-fx i mappen **Overførsler** (Downloads).
+Scriptet ligger på GitHub her:
+**https://github.com/stratudk/m365assessment**
+
+1. Åbn linket i en browser.
+2. Klik på filen **`Run-Maester.ps1`** i fillisten.
+3. Klik på download-knappen (**"Download raw file"** – ned-pil-ikonet) oppe til
+   højre over filen.
+4. Filen gemmes i din mappe **Overførsler** (Downloads).
 
 ---
 
@@ -50,16 +56,22 @@ Du har nu en kommandolinje klar.
 
 ## 4. Kør tjekket
 
-Skriv `pwsh -File ` (med mellemrum til sidst), **træk derefter filen `Run-Maester.ps1`
-ind i vinduet** med musen (så indsættes stien automatisk), og tryk Enter.
+Skriv `pwsh -ExecutionPolicy Bypass -File ` (med mellemrum til sidst), **træk derefter
+filen `Run-Maester.ps1` ind i vinduet** med musen (så indsættes stien automatisk), og
+tryk Enter.
 
 Kommandoen kommer til at se nogenlunde sådan ud:
 ```
-pwsh -File C:\Users\ditnavn\Downloads\Run-Maester.ps1
+pwsh -ExecutionPolicy Bypass -File C:\Users\ditnavn\Downloads\Run-Maester.ps1
 ```
 
-Tjekket går nu i gang. Først installeres de nødvendige værktøjer (det tager et par
-minutter første gang).
+> **Hvorfor `-ExecutionPolicy Bypass`?** Windows blokerer som standard scripts, der er
+> hentet fra internettet. Tilføjelsen tillader netop **denne ene kørsel** og ændrer
+> **ikke** nogen varig indstilling på maskinen.
+
+Tjekket går nu i gang. **Vær tålmodig:** Først installeres de nødvendige værktøjer, og
+der kan gå **et par minutter, før login-vinduet dukker op**. Det er normalt – luk ikke
+vinduet imens.
 
 ---
 
@@ -67,16 +79,27 @@ minutter første gang).
 
 Når du bliver bedt om det:
 
-1. Der åbnes et **browservindue**. Log ind med din arbejdskonto – har du en
+1. Der åbnes et **login-vindue**. Log ind med din arbejdskonto – har du en
    **separat administrator-konto**, så brug den.
-2. Godkend den **læsende** adgang, der bliver spurgt om.
+2. Godkend den **læsende** adgang (permissions), der bliver spurgt om.
 3. Du bliver sandsynligvis bedt om at logge ind **flere gange** i træk
-   (Entra/Graph, Exchange Online, Teams, Purview og Azure). Det er forventet –
-   godkend hver enkelt.
+   (Entra/Graph, Exchange Online, Teams, Purview og Azure). For hver tjeneste kan du
+   se en tilladelses-pop-up og derefter pop-up'en nævnt nedenfor – det er forventet,
+   gentag samme valg hver gang.
 
-> Hvis der ikke kan åbnes et browservindue (fx på en server), så kør i stedet:
-> `pwsh -File <sti til filen> -UseDeviceCode` – så får du i stedet en kort kode,
-> som du indtaster på https://microsoft.com/devicelogin i en anden fane.
+**Vær opmærksom på disse to pop-ups:**
+
+- **"Sign in to all your apps" / "Forbliv logget ind på alle dine apps":** Vælg linket
+  **"Nej, kun denne app"** ("No, sign in to this app only") nederst – **ikke** "OK"/"Ja".
+  Det undgår, at din enhed bliver tilmeldt organisationen.
+- **Forsvinder login-vinduet?** Hvis du vælger **"Anden bruger" / "Other user"**, kan
+  vinduet lægge sig **bag de øvrige vinduer** og mangle i proceslinjen. Tryk
+  **Alt+Tab** for at hente det frem igen.
+
+> Hvis der slet ikke kan åbnes et login-vindue (fx på en server), så kør i stedet:
+> `pwsh -ExecutionPolicy Bypass -File <sti til filen> -UseDeviceCode` – så får du i
+> stedet en kort kode, som du indtaster på https://microsoft.com/devicelogin i en
+> anden fane.
 
 ---
 
@@ -103,7 +126,7 @@ Til sidst i vinduet står der præcis, hvor filerne ligger. Som standard:
 
 **Sådan sender du dem:**
 1. Find filen **`maester-results.json`** og vedhæft den i en mail til din
-   StratuOne-konsulent.
+   Statu-konsulent.
 2. Hvis der også er en mappe ved navn **`scuba-results`**: højreklik på mappen →
    **"Send til"** → **"Komprimeret mappe (zip)"**, og vedhæft zip-filen i samme mail.
 
