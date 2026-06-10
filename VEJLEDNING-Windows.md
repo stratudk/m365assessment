@@ -109,26 +109,20 @@ Selve testene kører i nogle minutter. Du behøver ikke gøre noget imens.
 
 - At nogle tests bliver **"Skipped" (sprunget over)** er helt normalt – det betyder
   bare, at den funktion eller licens ikke findes i jeres miljø.
-- Til sidst kører der **automatisk et ekstra tjek** (CISA "ScubaGear"), som dækker
-  bl.a. Power Platform og Teams. Det giver **endnu et par login-prompter** og tager
-  lidt længere tid. Godkend også her den læsende adgang.
 
-Når alt er færdigt, viser vinduet en grøn besked med **stien til resultaterne**.
+Når alt er færdigt, viser vinduet en grøn besked med **stien til resultatet**.
 
 ---
 
 ## 7. Send resultatet til os
 
-Til sidst i vinduet står der præcis, hvor filerne ligger. Som standard:
+Til sidst i vinduet står der præcis, hvor filen ligger. Som standard:
 
 - Resultatfil: `C:\Users\ditnavn\maester-results.json`
-- Ekstra rapport-mappe: `C:\Users\ditnavn\scuba-results`
 
-**Sådan sender du dem:**
+**Sådan sender du den:**
 1. Find filen **`maester-results.json`** og vedhæft den i en mail til din
    Statu-konsulent.
-2. Hvis der også er en mappe ved navn **`scuba-results`**: højreklik på mappen →
-   **"Send til"** → **"Komprimeret mappe (zip)"**, og vedhæft zip-filen i samme mail.
 
 Det var det – tak! Vi tager os af resten.
 

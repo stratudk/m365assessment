@@ -26,9 +26,7 @@ to styresystemer.
    og godkender **læsende** adgang.
 3. Værktøjet [Maester](https://maester.dev) kører en række sikkerhedstests mod jeres
    miljø (Entra, Exchange, Teams, Purview m.fl.).
-4. På Windows køres desuden CISA's [ScubaGear](https://github.com/cisagov/ScubaGear)
-   for ekstra dækning (bl.a. Power Platform).
-5. Resultatet gemmes som en fil, du sender tilbage til os.
+4. Resultatet gemmes som en fil, du sender tilbage til os.
 
 Det tager typisk **10–25 minutter**, hvoraf det meste er ventetid.
 

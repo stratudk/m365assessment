@@ -24,11 +24,7 @@
          Dataverse for the Copilot Studio agent-security tests. Copilot Studio is
          optional — if there's no environment to read it is skipped, not failed.
       4. Runs the full test set and writes maester-results.json.
-      5. If Windows PowerShell 5.1 is available (Windows only), also runs CISA's
-         ScubaGear for the SCuBA baselines Maester doesn't cover (Power Platform,
-         Teams and Defender baselines, full SharePoint). Skipped automatically on
-         macOS/Linux, where PowerShell 5.1 doesn't exist.
-      6. Tells you where the file(s) are and how to send them to us.
+      5. Tells you where the file is and how to send it to us.
 
 .PARAMETER UseDeviceCode
     Force device-code sign-in (a short code you enter at microsoft.com/devicelogin
@@ -39,15 +35,6 @@
 .PARAMETER OutputFile
     Where to write the results. Defaults to maester-results.json in your home
     directory.
-
-.PARAMETER SkipScuba
-    Don't run CISA ScubaGear even when Windows PowerShell 5.1 is available. By
-    default ScubaGear runs automatically on Windows to add the SCuBA baselines
-    Maester doesn't cover; this switch turns that off.
-
-.PARAMETER ScubaOutPath
-    Folder for the ScubaGear reports. Defaults to scuba-results in your home
-    directory. Ignored when ScubaGear doesn't run.
 
 .NOTES
     Requirements : PowerShell 7 (run 'pwsh', NOT Windows PowerShell 5.1).
@@ -62,9 +49,7 @@
 [CmdletBinding()]
 param(
     [switch]$UseDeviceCode,
-    [string]$OutputFile = "$HOME/maester-results.json",
-    [switch]$SkipScuba,
-    [string]$ScubaOutPath = "$HOME/scuba-results"
+    [string]$OutputFile = "$HOME/maester-results.json"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -72,21 +57,6 @@ $ErrorActionPreference = 'Stop'
 function Write-Step {
     param([string]$Message)
     Write-Host "`n>> $Message" -ForegroundColor Cyan
-}
-
-function Get-WindowsPowerShell51Path {
-    # ScubaGear only runs on Windows PowerShell 5.1 (powershell.exe), which exists
-    # only on Windows — so this returns $null on macOS/Linux and the ScubaGear step
-    # is skipped. We can't trust the .exe file version (that reports the Windows
-    # build, e.g. 10.0.x), so we ask the engine itself for $PSVersionTable.
-    if (-not $IsWindows) { return $null }
-    $cmd = Get-Command powershell.exe -ErrorAction SilentlyContinue
-    if (-not $cmd) { return $null }
-    try {
-        $major = & $cmd.Source -NoProfile -NonInteractive -Command '$PSVersionTable.PSVersion.Major' 2>$null
-        if ("$major".Trim() -eq '5') { return $cmd.Source }
-    } catch { }
-    return $null
 }
 
 Write-Host "============================================================" -ForegroundColor Cyan
@@ -188,77 +158,17 @@ if (-not (Test-Path $OutputFile)) {
 }
 
 # ----------------------------------------------------------------------------
-# 5. Optional: CISA ScubaGear for the SCuBA baselines Maester doesn't cover
-#    (Power Platform, the Teams/Defender baselines, full SharePoint). Runs only
-#    on Windows PowerShell 5.1 and is best-effort, so a failure here never loses
-#    the Maester results we just wrote.
-# ----------------------------------------------------------------------------
-$scubaRan = $false
-$ps51 = Get-WindowsPowerShell51Path
-
-if ($SkipScuba) {
-    Write-Step "Skipping ScubaGear (-SkipScuba was set)."
-} elseif (-not $ps51) {
-    Write-Step "Skipping ScubaGear — Windows PowerShell 5.1 not available."
-    Write-Host "   ScubaGear is Windows-only. Maester already covered the Entra," -ForegroundColor DarkGray
-    Write-Host "   Exchange and SharePoint SCuBA baselines on this machine." -ForegroundColor DarkGray
-} else {
-    Write-Step "Windows PowerShell 5.1 detected — running CISA ScubaGear for the extra SCuBA baselines..."
-    Write-Host "   This adds Power Platform, Teams and Defender SCuBA coverage." -ForegroundColor Yellow
-    Write-Host "   Expect another round of sign-in prompts. Read-only, like Maester." -ForegroundColor Yellow
-    if (-not (Test-Path $ScubaOutPath)) { New-Item -ItemType Directory -Path $ScubaOutPath | Out-Null }
-
-    # ScubaGear can't run under PowerShell 7, so hand the work to powershell.exe.
-    # Initialize-SCuBA installs OPA and the per-product dependency modules; '*'
-    # runs every product baseline, including Power Platform (not in the default set).
-    #
-    # Build the child script with .Replace, NOT the -f format operator: the here-
-    # string contains literal { } braces (the if-block), which -f would misread as
-    # format placeholders and fail with "Input string was not in a correct format".
-    # The whole thing is inside try/catch so any hiccup here stays non-blocking.
-    try {
-        $scubaScript = @'
-$ErrorActionPreference = "Stop"
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-if (-not (Get-Module -ListAvailable -Name ScubaGear)) {
-    Install-Module ScubaGear -Scope CurrentUser -Force
-}
-Import-Module ScubaGear
-Initialize-SCuBA
-Invoke-SCuBA -ProductNames '*' -OutPath "__SCUBA_OUTPATH__" -Quiet
-'@.Replace('__SCUBA_OUTPATH__', $ScubaOutPath)
-
-        & $ps51 -NoProfile -ExecutionPolicy Bypass -Command $scubaScript
-        if ($LASTEXITCODE -ne 0) { throw "ScubaGear exited with code $LASTEXITCODE." }
-        $scubaRan = $true
-        Write-Host "   ScubaGear finished. Reports in $ScubaOutPath." -ForegroundColor Green
-    } catch {
-        Write-Host "   ScubaGear did not complete: $($_.Exception.Message)" -ForegroundColor Yellow
-        Write-Host "   Continuing — your Maester results are unaffected." -ForegroundColor Yellow
-    }
-}
-
-# ----------------------------------------------------------------------------
-# 6. Tell them where the file(s) are and how to hand them back
+# 5. Tell them where the file is and how to hand it back
 # ----------------------------------------------------------------------------
 $sizeKb = [math]::Round((Get-Item $OutputFile).Length / 1KB, 1)
 Write-Host "`n============================================================" -ForegroundColor Green
 Write-Host " Done. Results written to:" -ForegroundColor Green
 Write-Host "   Maester  : $OutputFile  ($sizeKb KB)" -ForegroundColor Green
-if ($scubaRan) {
-    Write-Host "   ScubaGear: $ScubaOutPath  (HTML + JSON reports)" -ForegroundColor Green
-}
 Write-Host "============================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "To send the results to your Statu consultant:" -ForegroundColor Cyan
 Write-Host "  1. Find the Maester file at:" -ForegroundColor White
 Write-Host "       $OutputFile" -ForegroundColor White
-if ($scubaRan) {
-    Write-Host "  2. Zip the ScubaGear report folder at:" -ForegroundColor White
-    Write-Host "       $ScubaOutPath" -ForegroundColor White
-    Write-Host "  3. Email both back to us." -ForegroundColor White
-} else {
-    Write-Host "  2. Email it back to us." -ForegroundColor White
-}
+Write-Host "  2. Email it back to us." -ForegroundColor White
 Write-Host ""
-Write-Host "The files contain test results only — no passwords or secrets." -ForegroundColor DarkGray
+Write-Host "The file contains test results only — no passwords or secrets." -ForegroundColor DarkGray
