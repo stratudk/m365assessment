@@ -1,124 +1,143 @@
 # M365 Reality Check – vejledning til **Mac**
 
-Denne vejledning hjælper dig med at køre vores sikkerhedstjek på jeres Microsoft 365-miljø
-og sende resultatet tilbage til os.
+Her er trin for trin, hvordan du kører vores sikkerhedstjek af jeres Microsoft
+365-miljø og sender resultatet tilbage til os. Du behøver ikke kunne noget teknisk –
+følg bare de 7 trin i rækkefølge.
 
 > **Det er helt sikkert at køre.** Tjekket er **kun læsende** – det aflæser jeres
 > sikkerhedsindstillinger og ændrer **ingenting** i jeres miljø. Der oprettes ingen
 > app-registrering, og der installeres intet permanent. Resultatfilen indeholder kun
 > testresultater – **ingen adgangskoder eller hemmeligheder.**
 
-Du skal regne med ca. **10–20 minutter** i alt. Det meste er ventetid, mens tjekket kører.
+**Tid:** ca. 10–20 minutter. Det meste er ventetid, hvor du bare lader vinduet stå.
+
+**Du skal bruge:**
+
+- En **administrator-konto** til Microsoft 365 (find den i trin 1).
+- En Mac, hvor du selv kan installere programmer.
 
 ---
 
-## 1. Før du går i gang
+## Trin 1: Find den rigtige konto
 
-Du skal bruge **PowerShell 7**.
+Tjekket **skal** køres med en **administrator-konto**. Med en almindelig
+brugerkonto bliver næsten alle testene sprunget over, og resultatet kan ikke bruges.
 
-1. Åbn programmet **Terminal** (findes under Programmer → Hjælpeprogrammer, eller
-   søg efter "Terminal" med Spotlight ⌘+mellemrum).
-2. Hvis du ikke allerede har **Homebrew**, så installér det først ved at følge
-   vejledningen på https://brew.sh
-3. Installér PowerShell 7:
+Sådan finder du ud af, hvilken konto det er:
+
+1. Åbn **https://admin.microsoft.com** i din browser.
+2. **Kommer du ind på siden?** Så er det den konto, du skal bruge i trin 5.
+3. **Får du "adgang nægtet"?** Så har du sandsynligvis en ekstra konto til
+   administration – den hedder typisk noget med "admin", fx `admin.navn@firma.dk`.
+   Prøv at logge ind med den i stedet.
+4. **Har du ikke sådan en konto?** Kontakt din Statu-konsulent, før du går videre.
+
+Notér brugernavnet på administrator-kontoen – du skal bruge det i trin 5.
+
+> **Log ud igen, når du har fundet den.** Klik på dine initialer øverst til højre →
+> **Log ud**. Så undgår du, at login i trin 5 automatisk vælger den forkerte konto.
+
+---
+
+## Trin 2: Installér PowerShell 7
+
+1. Åbn programmet **Terminal** (tryk ⌘+mellemrum, skriv `Terminal`, tryk Enter).
+2. Har du ikke **Homebrew** i forvejen, så installér det først ved at følge
+   vejledningen på **https://brew.sh**
+3. Kopiér denne kommando ind i Terminal, og tryk Enter:
    ```
    brew install powershell
    ```
 
-**Rettigheder:** Log ind med en konto, der har rollen **Global Reader** eller
-**Security Reader**. En almindelig brugerkonto virker også, men så bliver nogle af
-testene sprunget over – det er helt normalt.
+---
 
-> **Har du en separat administrator-konto?** Mange har én konto til daglig brug og
-> en anden til administration. Brug i så fald **din administrator-konto**, når du
-> logger ind i trin 5 – det er den, der har rettighederne til at aflæse alle
-> indstillinger og dermed giver det mest komplette resultat.
+## Trin 3: Hent scriptet
+
+1. Åbn **https://github.com/stratudk/m365assessment** i din browser.
+2. Klik på filen **`Run-Maester.ps1`** i listen.
+3. Klik på download-knappen oppe til højre over filen (**"Download raw file"** –
+   ikonet med pilen nedad).
+4. Filen lander i mappen **Overførsler** (Downloads).
 
 ---
 
-## 2. Hent scriptet
+## Trin 4: Start tjekket
 
-Scriptet ligger på GitHub her:
-**https://github.com/stratudk/m365assessment**
+1. Åbn **Terminal**.
+2. Skriv dette – **med et mellemrum til sidst**:
+   ```
+   pwsh -File 
+   ```
+3. **Træk filen `Run-Maester.ps1` fra Overførsler ind i vinduet** med musen. Så
+   indsættes stien automatisk.
+4. Tryk **Enter**.
 
-1. Åbn linket i en browser.
-2. Klik på filen **`Run-Maester.ps1`** i fillisten.
-3. Klik på download-knappen (**"Download raw file"** – ned-pil-ikonet) oppe til
-   højre over filen.
-4. Filen gemmes i din mappe **Overførsler** (Downloads).
+Linjen kommer til at se nogenlunde sådan ud:
 
----
-
-## 3. Start PowerShell 7
-
-I **Terminal** skriver du `pwsh` og trykker Enter.
-Du har nu en kommandolinje klar (linjen begynder typisk med `PS`).
-
----
-
-## 4. Kør tjekket
-
-Skriv `pwsh -File ` (med mellemrum til sidst), **træk derefter filen `Run-Maester.ps1`
-ind i vinduet** med musen (så indsættes stien automatisk), og tryk Enter.
-
-Kommandoen kommer til at se nogenlunde sådan ud:
 ```
 pwsh -File ~/Downloads/Run-Maester.ps1
 ```
 
-Tjekket går nu i gang. **Vær tålmodig:** Først installeres de nødvendige værktøjer, og
-der kan gå **et par minutter, før login-vinduet dukker op**. Det er normalt – luk ikke
-vinduet imens.
+**Vær tålmodig:** Først installeres værktøjerne, og der kan gå **et par minutter,
+før login-vinduet dukker op**. Det er normalt – luk ikke vinduet imens.
 
 ---
 
-## 5. Log ind
+## Trin 5: Log ind med administrator-kontoen
 
-Når du bliver bedt om det:
+Efter et par minutter åbner der et **browservindue** med en login-side.
 
-1. Der åbnes et **browservindue**. Log ind med din arbejdskonto – har du en
-   **separat administrator-konto**, så brug den.
+1. **Se efter, hvilken konto der står på siden.**
+   - Er det administrator-kontoen fra trin 1? Så fortsæt.
+   - Er det en anden konto? Klik på **"Brug en anden konto"** ("Use another
+     account"), og log ind med administrator-kontoen.
 2. Godkend den **læsende** adgang, der bliver spurgt om.
-3. Du bliver sandsynligvis bedt om at logge ind **flere gange** i træk
-   (Entra/Graph, Exchange Online, Teams, Purview og Azure). Det er forventet –
-   godkend hver enkelt.
+3. Det gentager sig **4–5 gange** – én gang for hver tjeneste (Entra, Exchange,
+   Teams, Purview og Azure). Det er helt normalt. **Brug den samme
+   administrator-konto hver gang.**
 
-> Hvis der ikke kan åbnes et browservindue, så kør i stedet:
-> `pwsh -File <sti til filen> -UseDeviceCode` – så får du i stedet en kort kode,
-> som du indtaster på https://microsoft.com/devicelogin i en anden fane.
-
----
-
-## 6. Vent på resultatet
-
-Selve testene kører i nogle minutter. Du behøver ikke gøre noget imens.
-
-At nogle tests bliver **"Skipped" (sprunget over)** er helt normalt – det betyder
-bare, at den funktion eller licens ikke findes i jeres miljø.
-
-Når alt er færdigt, viser vinduet en grøn besked med **stien til resultatfilen**.
+| Hvis du ser dette | Så gør du sådan |
+| --- | --- |
+| Du bliver logget ind uden at blive spurgt – med den forkerte konto | Luk fanen, log ud på https://www.office.com (initialer øverst til højre → **Log ud**), og gentag trin 4. |
+| Login-siden beder om godkendelse igen og igen | Det er de forskellige tjenester. Godkend hver enkelt med samme konto. |
 
 ---
 
-## 7. Send resultatet til os
+## Trin 6: Vent på resultatet
 
-Til sidst i vinduet står der præcis, hvor filen ligger. Som standard:
+Nu kører testene i nogle minutter. Du skal ikke gøre noget – lad bare vinduet stå.
 
-- `/Users/ditnavn/maester-results.json`
+- At nogle tests bliver **"Skipped" (sprunget over)** er helt normalt. Det betyder
+  bare, at funktionen eller licensen ikke findes hos jer.
+- Bliver **næsten alle** sprunget over, er du logget ind med den forkerte konto.
+  Gentag trin 4 og 5 med administrator-kontoen.
 
-**Sådan sender du den:**
-1. Find filen **`maester-results.json`** på det viste sted. (Tip: i **Finder** kan du
-   trykke ⌘+⇧+H for at åbne din hjemmemappe, hvor filen ligger.)
-2. Vedhæft den i en mail til din Statu-konsulent.
+Til sidst kommer der en **grøn besked** med stien til resultatfilen.
 
-Det var det – tak! Vi tager os af resten.
+---
+
+## Trin 7: Send resultatet til os
+
+Filen hedder **`maester-results.json`** og ligger som standard i din hjemmemappe:
+
+```
+/Users/ditnavn/maester-results.json
+```
+
+Tip: I **Finder** kan du trykke ⌘+⇧+H for at åbne hjemmemappen, hvor filen ligger.
+
+Vedhæft filen i en mail til din Statu-konsulent.
+
+Det var det – tak! Vi klarer resten.
 
 ---
 
 ## Hvis noget går galt
 
-- **"pwsh: command not found":** PowerShell 7 er ikke installeret. Gentag trin 1.
-- **"Sign-in did not complete":** Login blev ikke gennemført. Kør kommandoen i trin 4
-  igen og gennemfør alle login-trin.
-- **Browseren åbner ikke:** Brug `-UseDeviceCode` som beskrevet i trin 5.
-- **Andet:** Tag et skærmbillede af fejlbeskeden og send det til os, så hjælper vi.
+| Problem | Løsning |
+| --- | --- |
+| "pwsh: command not found" | PowerShell 7 er ikke installeret. Gentag trin 2. |
+| "Sign-in did not complete" | Login blev ikke gennemført. Gentag trin 4, og gennemfør alle login-trin. |
+| Adgang nægtet, eller næsten alle tests sprunget over | Forkert konto. Log ud i browseren, gentag trin 4, og vælg **"Brug en anden konto"**. |
+| Der åbnes slet ikke noget browservindue | Kør kommandoen fra trin 4 igen med `-UseDeviceCode` til sidst. Så får du en kort kode, du indtaster på https://microsoft.com/devicelogin. |
+| Noget helt andet | Tag et skærmbillede af fejlbeskeden, og send det til os – så hjælper vi. |

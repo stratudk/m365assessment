@@ -22,22 +22,20 @@ to styresystemer.
 ## Hvad sker der, kort fortalt
 
 1. Der installeres nogle PowerShell-værktøjer, kun for din session.
-2. Du logger ind med din egen konto (helst en **administrator-konto**, hvis du har en)
-   og godkender **læsende** adgang.
+2. Du logger ind med en **administrator-konto** og godkender **læsende** adgang.
 3. Værktøjet [Maester](https://maester.dev) kører en række sikkerhedstests mod jeres
    miljø (Entra, Exchange, Teams, Purview m.fl.).
-4. På Windows køres desuden CISA's [ScubaGear](https://github.com/cisagov/ScubaGear)
-   for ekstra dækning (bl.a. Power Platform).
-5. Resultatet gemmes som en fil, du sender tilbage til os.
+4. Resultatet gemmes som en fil, du sender tilbage til os.
 
 Det tager typisk **10–25 minutter**, hvoraf det meste er ventetid.
 
 ## Krav
 
 - **PowerShell 7** (installeres som en del af vejledningen).
-- En konto med rollen **Global Reader** eller **Security Reader** giver det mest
-  komplette resultat. En almindelig brugerkonto virker også, men så springes nogle
-  tests over.
+- En **administrator-konto** til Microsoft 365 – altså den konto, der kan logge ind på
+  https://admin.microsoft.com. Har I en separat admin-konto, er det den, der skal
+  bruges. Med en almindelig brugerkonto bliver næsten alle tests sprunget over, og
+  resultatet kan ikke bruges.
 
 ## Spørgsmål?
 
