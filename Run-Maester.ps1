@@ -94,37 +94,80 @@ if (-not $haveNuGet) {
     }
 }
 
-# Install one module into the current user's profile.
-#
-# PowerShellGet v2 (Install-Module) is the proven path, but it always goes through
-# the NuGet provider. When that provider is missing or blocked, PowerShellGet fails
-# with "Administrator rights are required to install or update" even though we ask
-# for -Scope CurrentUser. PSResourceGet (Install-PSResource) ships with PowerShell
-# 7.4+ and talks to the gallery directly, so it has no such dependency — use it as
-# the fallback. PSGallery speaks the NuGet v2 protocol, so dependencies (the
-# Microsoft.Graph modules Maester needs, for example) are still resolved for us.
+# Where 'Scope CurrentUser' actually points. PowerShell puts per-user modules under
+# the user's Documents folder, and plenty of companies redirect Documents to a
+# network share (\\server\share\user). Installing there fails in two different,
+# equally confusing ways:
+#   PowerShellGet : "Administrator rights are required to install or update."
+#   PSResourceGet : "Could not find file '\\server\share\user\PowerShell\Modules\X'"
+# So keep our own module folder on this machine and put it on the module search
+# path for this session only — nothing outside the session is changed.
+$script:LocalModuleRoot = if ($IsWindows) {
+    Join-Path $env:LOCALAPPDATA 'Statu\M365RealityCheck\Modules'
+} else {
+    Join-Path $HOME '.statu-m365realitycheck/Modules'
+}
+New-Item -ItemType Directory -Path $script:LocalModuleRoot -Force | Out-Null
+$env:PSModulePath = $script:LocalModuleRoot + [System.IO.Path]::PathSeparator + $env:PSModulePath
+
+$userDocuments = [Environment]::GetFolderPath('MyDocuments')
+$script:ProfileIsRemote = $userDocuments -like '\\*'
+if ($script:ProfileIsRemote) {
+    Write-Host "   Your Documents folder is on a network drive:" -ForegroundColor DarkGray
+    Write-Host "   $userDocuments" -ForegroundColor DarkGray
+    Write-Host "   Installing the modules on this PC instead." -ForegroundColor DarkGray
+}
+
+# Install one module, trying the least surprising option first.
+#   1. Install-Module     - PowerShellGet v2, the proven path, but it goes through
+#                           the NuGet provider and writes to the user profile.
+#   2. Install-PSResource - PSResourceGet (PowerShell 7.4+), no NuGet provider
+#                           needed, but still writes to the user profile.
+#   3. Save-PSResource    - writes to our local folder, so it works even when the
+#                           profile is on a network share.
+# Steps 1 and 2 are skipped outright when we already know the profile is remote.
 function Install-RequiredModule {
     param([Parameter(Mandatory)][string]$Name)
 
-    # -Force (and -TrustRepository below) also keeps PSGallery's "untrusted
-    # repository" prompt from halting the run, without changing the repository's
-    # saved trust setting.
-    try {
-        if ($Name -eq 'Pester') {
-            # Windows ships a Microsoft-signed Pester 3.4 that PS7 can see, so the
-            # publisher check has to be waived to install a current version.
-            Install-Module -Name $Name -Force -Scope CurrentUser -SkipPublisherCheck -ErrorAction Stop
-        } else {
-            Install-Module -Name $Name -Force -Scope CurrentUser -ErrorAction Stop
+    if (-not $script:ProfileIsRemote) {
+        # -Force (and -TrustRepository below) also keeps PSGallery's "untrusted
+        # repository" prompt from halting the run, without changing the
+        # repository's saved trust setting.
+        try {
+            if ($Name -eq 'Pester') {
+                # Windows ships a Microsoft-signed Pester 3.4 that PS7 can see, so
+                # the publisher check has to be waived to install a current version.
+                Install-Module -Name $Name -Force -Scope CurrentUser -SkipPublisherCheck -ErrorAction Stop
+            } else {
+                Install-Module -Name $Name -Force -Scope CurrentUser -ErrorAction Stop
+            }
+            return
+        } catch {
+            Write-Host "   PowerShellGet couldn't install $Name — trying PSResourceGet." -ForegroundColor DarkGray
         }
-        return
-    } catch {
-        if (-not (Get-Command Install-PSResource -ErrorAction SilentlyContinue)) { throw }
-        Write-Host "   PowerShellGet couldn't install $Name — retrying with PSResourceGet." -ForegroundColor DarkGray
-        Write-Host "   ($($_.Exception.Message.Trim()))" -ForegroundColor DarkGray
+
+        if (Get-Command Install-PSResource -ErrorAction SilentlyContinue) {
+            try {
+                Install-PSResource -Name $Name -Scope CurrentUser -TrustRepository -Quiet -ErrorAction Stop
+                return
+            } catch {
+                Write-Host "   That didn't work either — saving $Name on this PC instead." -ForegroundColor DarkGray
+            }
+        }
     }
 
-    Install-PSResource -Name $Name -Scope CurrentUser -TrustRepository -Quiet -ErrorAction Stop
+    # Our own folder, already on $env:PSModulePath above. Clear any half-finished
+    # copy from an earlier run so the save starts clean.
+    $destination = Join-Path $script:LocalModuleRoot $Name
+    if (Test-Path $destination) {
+        Remove-Item -Path $destination -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    if (Get-Command Save-PSResource -ErrorAction SilentlyContinue) {
+        Save-PSResource -Name $Name -Path $script:LocalModuleRoot -TrustRepository -Quiet -ErrorAction Stop
+    } else {
+        Save-Module -Name $Name -Path $script:LocalModuleRoot -Force -ErrorAction Stop
+    }
 }
 
 # The service modules are required for full coverage: 'Connect-Maester -Service All'
