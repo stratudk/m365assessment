@@ -14,7 +14,8 @@ følg bare de 7 trin i rækkefølge.
 **Du skal bruge:**
 
 - En **administrator-konto** til Microsoft 365 (find den i trin 1).
-- En Windows-computer, hvor du selv kan installere programmer.
+- En Windows-computer, hvor du må installere programmer (ellers hjælper jeres
+  it-support i trin 2).
 
 ---
 
@@ -22,6 +23,9 @@ følg bare de 7 trin i rækkefølge.
 
 Tjekket **skal** køres med en **administrator-konto**. Med en almindelig
 brugerkonto bliver næsten alle testene sprunget over, og resultatet kan ikke bruges.
+
+> Her betyder "administrator" en konto i **Microsoft 365** – det er ikke det samme
+> som at være administrator på selve computeren.
 
 Sådan finder du ud af, hvilken konto det er:
 
@@ -49,7 +53,13 @@ med Windows.
    ```
    winget install Microsoft.PowerShell
    ```
-3. Når den er færdig: **luk vinduet** og åbn et **nyt**, så den nye version er aktiv.
+3. Windows spørger sandsynligvis: *"Vil du tillade, at denne app foretager
+   ændringer på din enhed?"* Klik **Ja**.
+4. Når den er færdig: **luk vinduet** og åbn et **nyt**, så den nye version er aktiv.
+
+> **Kan du ikke klikke "Ja"?** Så må du ikke installere programmer på computeren.
+> Bed jeres it-support om at installere PowerShell 7 – resten af trinene kan du
+> selv klare bagefter.
 
 ---
 
@@ -82,6 +92,11 @@ pwsh -ExecutionPolicy Bypass -File C:\Users\ditnavn\Downloads\Run-Maester.ps1
 
 **Vær tålmodig:** Først installeres værktøjerne, og der kan gå **et par minutter,
 før login-vinduet dukker op**. Det er normalt – luk ikke vinduet imens.
+
+> **Du skal ikke vælge "Kør som administrator".** Åbn Terminal helt normalt.
+> Tjekket installerer kun ting til din egen brugerprofil. I et
+> administrator-vindue kan du ikke trække filen ind (det blokerer Windows), og
+> resultatfilen kan ende i en anden brugers mappe.
 
 > **Hvad betyder `-ExecutionPolicy Bypass`?** Windows blokerer som standard scripts,
 > der er hentet fra internettet. Tilføjelsen tillader **denne ene kørsel** og ændrer
@@ -144,6 +159,7 @@ Det var det – tak! Vi klarer resten.
 | Problem | Løsning |
 | --- | --- |
 | "pwsh kendes ikke" / "command not found" | PowerShell 7 er ikke installeret, eller vinduet er ikke genstartet. Gentag trin 2, og åbn et **nyt** vindue. |
+| "Administrator rights are required to install or update" | Du kører en ældre udgave af scriptet. Hent den nyeste (trin 3), og kør igen. Du skal **ikke** køre som administrator. |
 | "Sign-in did not complete" | Login blev ikke gennemført. Gentag trin 4, og gennemfør alle login-trin. |
 | Adgang nægtet, eller næsten alle tests sprunget over | Forkert konto. Log ud i browseren, gentag trin 4, og vælg **"Brug en anden konto"**. |
 | Der åbnes slet ikke noget login-vindue (fx på en server) | Kør kommandoen fra trin 4 igen med `-UseDeviceCode` til sidst. Så får du en kort kode, du indtaster på https://microsoft.com/devicelogin. |

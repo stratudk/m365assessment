@@ -69,16 +69,47 @@ Write-Host "============================================================" -Foreg
 # 1. Install the modules (current user only — no admin rights needed)
 # ----------------------------------------------------------------------------
 Write-Step "Installing Maester, Pester and the service modules (this can take a few minutes)..."
-Install-Module Pester  -SkipPublisherCheck -Force -Scope CurrentUser
-Install-Module Maester -Force -Scope CurrentUser
 
-# Service modules required for full coverage. 'Connect-Maester -Service All' uses
-# these to reach Exchange Online / Purview (ExchangeOnlineManagement), Teams
+# PowerShellGet needs the NuGet package provider before it can install anything.
+# If it isn't present it bootstraps itself into $env:ProgramFiles\PackageManagement,
+# which fails on a normal user account with:
+#   "Install-Package: Administrator rights are required to install or update."
+# That message is misleading here — our Install-Module calls are already scoped to
+# CurrentUser; it's the provider bootstrap that wants the machine-wide folder. So
+# install the provider for the current user first, before anything triggers it.
+$haveNuGet = $false
+try {
+    $haveNuGet = [bool](Get-PackageProvider -Name NuGet -ErrorAction Stop)
+} catch {
+    $haveNuGet = $false
+}
+if (-not $haveNuGet) {
+    Write-Host "   Installing the NuGet package provider (your user account only)..." -ForegroundColor DarkGray
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force | Out-Null
+}
+
+# -Force also stops PSGallery's "untrusted repository" prompt from halting the run
+# without changing the repository's saved trust setting.
+#
+# The service modules are required for full coverage: 'Connect-Maester -Service All'
+# uses them to reach Exchange Online / Purview (ExchangeOnlineManagement), Teams
 # (MicrosoftTeams) and Azure (Az.Accounts). Without them those connections are
-# skipped and ~300 tests don't run. Installed for the current user only.
-Install-Module ExchangeOnlineManagement -Force -Scope CurrentUser
-Install-Module MicrosoftTeams           -Force -Scope CurrentUser
-Install-Module Az.Accounts              -Force -Scope CurrentUser
+# skipped and ~300 tests don't run. Everything goes into the current user's profile.
+try {
+    Install-Module Pester  -SkipPublisherCheck -Force -Scope CurrentUser
+    Install-Module Maester -Force -Scope CurrentUser
+    Install-Module ExchangeOnlineManagement -Force -Scope CurrentUser
+    Install-Module MicrosoftTeams           -Force -Scope CurrentUser
+    Install-Module Az.Accounts              -Force -Scope CurrentUser
+} catch {
+    Write-Host ""
+    Write-Host "   The modules could not be installed:" -ForegroundColor Red
+    Write-Host "   $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "   Nothing was changed on your machine. Please send this message to" -ForegroundColor Yellow
+    Write-Host "   your Statu consultant (a screenshot is fine) and we'll help you." -ForegroundColor Yellow
+    throw
+}
 
 Import-Module Maester
 

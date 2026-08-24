@@ -14,7 +14,7 @@ følg bare de 7 trin i rækkefølge.
 **Du skal bruge:**
 
 - En **administrator-konto** til Microsoft 365 (find den i trin 1).
-- En Mac, hvor du selv kan installere programmer.
+- En Mac, hvor du må installere programmer (ellers hjælper jeres it-support i trin 2).
 
 ---
 
@@ -22,6 +22,9 @@ følg bare de 7 trin i rækkefølge.
 
 Tjekket **skal** køres med en **administrator-konto**. Med en almindelig
 brugerkonto bliver næsten alle testene sprunget over, og resultatet kan ikke bruges.
+
+> Her betyder "administrator" en konto i **Microsoft 365** – det er ikke det samme
+> som at være administrator på selve din Mac.
 
 Sådan finder du ud af, hvilken konto det er:
 
@@ -48,6 +51,10 @@ Notér brugernavnet på administrator-kontoen – du skal bruge det i trin 5.
    ```
    brew install powershell
    ```
+4. Bliver du bedt om din **Mac-adgangskode**, så skriv den (der vises ingen tegn,
+   mens du skriver – det er normalt) og tryk Enter.
+
+> Skriv **ikke** `sudo` foran kommandoen – Homebrew skal køres som dig selv.
 
 ---
 
@@ -80,6 +87,9 @@ pwsh -File ~/Downloads/Run-Maester.ps1
 
 **Vær tålmodig:** Først installeres værktøjerne, og der kan gå **et par minutter,
 før login-vinduet dukker op**. Det er normalt – luk ikke vinduet imens.
+
+> **Brug ikke `sudo`.** Tjekket installerer kun ting til din egen brugerprofil, og
+> med `sudo` kan resultatfilen ende et andet sted, end vejledningen siger.
 
 ---
 
@@ -137,6 +147,7 @@ Det var det – tak! Vi klarer resten.
 | Problem | Løsning |
 | --- | --- |
 | "pwsh: command not found" | PowerShell 7 er ikke installeret. Gentag trin 2. |
+| "Administrator rights are required to install or update" | Du kører en ældre udgave af scriptet. Hent den nyeste (trin 3), og kør igen. Du skal **ikke** køre som administrator. |
 | "Sign-in did not complete" | Login blev ikke gennemført. Gentag trin 4, og gennemfør alle login-trin. |
 | Adgang nægtet, eller næsten alle tests sprunget over | Forkert konto. Log ud i browseren, gentag trin 4, og vælg **"Brug en anden konto"**. |
 | Der åbnes slet ikke noget browservindue | Kør kommandoen fra trin 4 igen med `-UseDeviceCode` til sidst. Så får du en kort kode, du indtaster på https://microsoft.com/devicelogin. |
