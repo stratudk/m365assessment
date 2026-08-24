@@ -85,22 +85,56 @@ try {
 }
 if (-not $haveNuGet) {
     Write-Host "   Installing the NuGet package provider (your user account only)..." -ForegroundColor DarkGray
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force | Out-Null
+    # Non-fatal: if even the user-scoped provider install is blocked, carry on —
+    # Install-RequiredModule falls back to PSResourceGet, which needs no provider.
+    try {
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force | Out-Null
+    } catch {
+        Write-Host "   Couldn't install it; will use PSResourceGet instead." -ForegroundColor DarkGray
+    }
 }
 
-# -Force also stops PSGallery's "untrusted repository" prompt from halting the run
-# without changing the repository's saved trust setting.
+# Install one module into the current user's profile.
 #
+# PowerShellGet v2 (Install-Module) is the proven path, but it always goes through
+# the NuGet provider. When that provider is missing or blocked, PowerShellGet fails
+# with "Administrator rights are required to install or update" even though we ask
+# for -Scope CurrentUser. PSResourceGet (Install-PSResource) ships with PowerShell
+# 7.4+ and talks to the gallery directly, so it has no such dependency — use it as
+# the fallback. PSGallery speaks the NuGet v2 protocol, so dependencies (the
+# Microsoft.Graph modules Maester needs, for example) are still resolved for us.
+function Install-RequiredModule {
+    param([Parameter(Mandatory)][string]$Name)
+
+    # -Force (and -TrustRepository below) also keeps PSGallery's "untrusted
+    # repository" prompt from halting the run, without changing the repository's
+    # saved trust setting.
+    try {
+        if ($Name -eq 'Pester') {
+            # Windows ships a Microsoft-signed Pester 3.4 that PS7 can see, so the
+            # publisher check has to be waived to install a current version.
+            Install-Module -Name $Name -Force -Scope CurrentUser -SkipPublisherCheck -ErrorAction Stop
+        } else {
+            Install-Module -Name $Name -Force -Scope CurrentUser -ErrorAction Stop
+        }
+        return
+    } catch {
+        if (-not (Get-Command Install-PSResource -ErrorAction SilentlyContinue)) { throw }
+        Write-Host "   PowerShellGet couldn't install $Name — retrying with PSResourceGet." -ForegroundColor DarkGray
+        Write-Host "   ($($_.Exception.Message.Trim()))" -ForegroundColor DarkGray
+    }
+
+    Install-PSResource -Name $Name -Scope CurrentUser -TrustRepository -Quiet -ErrorAction Stop
+}
+
 # The service modules are required for full coverage: 'Connect-Maester -Service All'
 # uses them to reach Exchange Online / Purview (ExchangeOnlineManagement), Teams
 # (MicrosoftTeams) and Azure (Az.Accounts). Without them those connections are
 # skipped and ~300 tests don't run. Everything goes into the current user's profile.
 try {
-    Install-Module Pester  -SkipPublisherCheck -Force -Scope CurrentUser
-    Install-Module Maester -Force -Scope CurrentUser
-    Install-Module ExchangeOnlineManagement -Force -Scope CurrentUser
-    Install-Module MicrosoftTeams           -Force -Scope CurrentUser
-    Install-Module Az.Accounts              -Force -Scope CurrentUser
+    foreach ($moduleName in @('Pester', 'Maester', 'ExchangeOnlineManagement', 'MicrosoftTeams', 'Az.Accounts')) {
+        Install-RequiredModule -Name $moduleName
+    }
 } catch {
     Write-Host ""
     Write-Host "   The modules could not be installed:" -ForegroundColor Red
