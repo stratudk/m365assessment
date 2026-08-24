@@ -70,6 +70,35 @@ Write-Host "============================================================" -Foreg
 # ----------------------------------------------------------------------------
 Write-Step "Installing Maester, Pester and the service modules (this can take a few minutes)..."
 
+# Keep the folder name short: Windows still caps most paths at 260 characters and
+# Microsoft.Graph nests its dependencies several levels deep.
+$script:LocalModuleRoot = if ($IsWindows) {
+    $localAppData = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { $env:TEMP }
+    Join-Path $localAppData 'StatuM365\Modules'
+} else {
+    Join-Path $HOME '.statu-m365/Modules'
+}
+
+# Only put our folder on the module search path when we're actually going to use
+# it. Adding it unconditionally would let a stale copy saved by an earlier run
+# shadow a fresh one installed into the profile.
+function Enable-LocalModuleRoot {
+    New-Item -ItemType Directory -Path $script:LocalModuleRoot -Force | Out-Null
+    $separator = [System.IO.Path]::PathSeparator
+    if (($env:PSModulePath -split [regex]::Escape($separator)) -notcontains $script:LocalModuleRoot) {
+        $env:PSModulePath = $script:LocalModuleRoot + $separator + $env:PSModulePath
+    }
+}
+
+$userDocuments = [Environment]::GetFolderPath('MyDocuments')
+$script:ProfileIsRemote = $userDocuments -like '\\*'
+if ($script:ProfileIsRemote) {
+    Write-Host "   Your Documents folder is on a network drive:" -ForegroundColor DarkGray
+    Write-Host "   $userDocuments" -ForegroundColor DarkGray
+    Write-Host "   Installing the modules on this PC instead." -ForegroundColor DarkGray
+    Enable-LocalModuleRoot
+}
+
 # PowerShellGet needs the NuGet package provider before it can install anything.
 # If it isn't present it bootstraps itself into $env:ProgramFiles\PackageManagement,
 # which fails on a normal user account with:
@@ -83,7 +112,7 @@ try {
 } catch {
     $haveNuGet = $false
 }
-if (-not $haveNuGet) {
+if (-not $haveNuGet -and -not $script:ProfileIsRemote) {
     Write-Host "   Installing the NuGet package provider (your user account only)..." -ForegroundColor DarkGray
     # Non-fatal: if even the user-scoped provider install is blocked, carry on —
     # Install-RequiredModule falls back to PSResourceGet, which needs no provider.
@@ -102,22 +131,6 @@ if (-not $haveNuGet) {
 #   PSResourceGet : "Could not find file '\\server\share\user\PowerShell\Modules\X'"
 # So keep our own module folder on this machine and put it on the module search
 # path for this session only — nothing outside the session is changed.
-$script:LocalModuleRoot = if ($IsWindows) {
-    Join-Path $env:LOCALAPPDATA 'Statu\M365RealityCheck\Modules'
-} else {
-    Join-Path $HOME '.statu-m365realitycheck/Modules'
-}
-New-Item -ItemType Directory -Path $script:LocalModuleRoot -Force | Out-Null
-$env:PSModulePath = $script:LocalModuleRoot + [System.IO.Path]::PathSeparator + $env:PSModulePath
-
-$userDocuments = [Environment]::GetFolderPath('MyDocuments')
-$script:ProfileIsRemote = $userDocuments -like '\\*'
-if ($script:ProfileIsRemote) {
-    Write-Host "   Your Documents folder is on a network drive:" -ForegroundColor DarkGray
-    Write-Host "   $userDocuments" -ForegroundColor DarkGray
-    Write-Host "   Installing the modules on this PC instead." -ForegroundColor DarkGray
-}
-
 # Install one module, trying the least surprising option first.
 #   1. Install-Module     - PowerShellGet v2, the proven path, but it goes through
 #                           the NuGet provider and writes to the user profile.
@@ -156,8 +169,9 @@ function Install-RequiredModule {
         }
     }
 
-    # Our own folder, already on $env:PSModulePath above. Clear any half-finished
-    # copy from an earlier run so the save starts clean.
+    # Our own folder. Clear any half-finished copy from an earlier run so the
+    # save starts clean.
+    Enable-LocalModuleRoot
     $destination = Join-Path $script:LocalModuleRoot $Name
     if (Test-Path $destination) {
         Remove-Item -Path $destination -Recurse -Force -ErrorAction SilentlyContinue
